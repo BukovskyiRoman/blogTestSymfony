@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Post;
+use App\Utils\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -18,6 +19,17 @@ class PostRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Post::class);
     }
+
+    /**
+     * @param int $page
+     * @return Paginator
+     */
+    public function getList(int $page): Paginator
+    {
+        $qb = $this->createQueryBuilder('p');
+        return (new Paginator($qb))->pagination($page);
+    }
+
 
     // /**
     //  * @return Post[] Returns an array of Post objects

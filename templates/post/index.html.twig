@@ -3,42 +3,74 @@
 {% block title %}Post index{% endblock %}
 
 {% block body %}
-
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <p>Email: {{ app.user.email }}</p>
     {% endif %}
 
     <h1>Post index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Body</th>
-                <th>Author</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for post in posts %}
-            <tr>
-                <td>{{ post.id }}</td>
-                <td><a href="{{ path('post_show', {'id': post.id}) }}">{{ post.title }}</a></td>
-                <td>{{ post.body }}</td>
-                <td>{{ post.userId.name }}</td>
-                <td>
-                    <a href="{{ path('post_show', {'id': post.id}) }}">show</a>
-                    <a href="{{ path('post_edit', {'id': post.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash-{{ label }}">
+                {{ message }}
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
+    {% endfor %}
 
-    <a href="{{ path('post_new') }}">Create new</a>
+    <div class="card-body" style="border: 1px solid grey; padding: 30px; margin-bottom: 2%">
+        <h1>Create post form</h1>
+        {{ include('post/_form.html.twig') }}
+    </div>
+
+    {% for post in pagination.posts %}
+        <div class="card mb-2" style="width: 100%;">
+            <div class="card-body m-3">
+                <h5 class="card-title">Title: {{ post.title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Author: {{ post.userId.name }}</h6>
+                <h6 class="card-subtitle mb-2 text-muted">Date: {{ post.createdAt|date("H:i  j F") }}</h6>
+                <p class="card-text">{{ post.body }}</p>
+                <a href="{{ path('post_show', {'id': post.id}) }}" class="card-link">Show</a>
+                <a href="{{ path('post_edit', {'id': post.id}) }}" class="card-link">Edit</a>
+            </div>
+
+            <div class="card-body" style="border: 1px solid grey">
+                {% for comment in post.getComments() %}
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="{{ comment.id }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#flush-collapse{{ comment.id }}" aria-expanded="false"
+                                        aria-controls="flush-collapse{{ comment.id }}">
+                                    Comment: </br> Date: </br> Author: {{ comment.getUser.name }}
+                                </button>
+                            </h2>
+                            <div id="flush-collapse{{ comment.id }}"  class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+                                 data-bs-parent="#accordionFlushExample">
+                                <div class="accordion-body">
+                                    <p>{{ comment.body }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body" style="border: 1px solid grey; padding: 30px; margin-bottom: 2%">
+                            <h5>Write comment:</h5>
+                            {% include'comment/_formComment.html.twig' %}
+                            <button class="btn btn-info" formaction="{{ path('comment_new') }}">{{ button_label|default('Save') }}</button>
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+
+    {% else %}
+        <div class="card mb-2" style="width: 68rem;">
+            <h1>No records</h1>
+        </div>
+    {% endfor %}
+
+    <a class="btn btn-primary m-3" href="{{ path('post_new') }}">Create new</a>
+
+    {% include 'utils/paginator.html.twig' with {'p': pagination} %}
+
 {% endblock %}

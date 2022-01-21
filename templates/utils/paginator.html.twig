@@ -1,0 +1,53 @@
+{% if p.hasToPaginate %}
+    {% set currentPath = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+    <ul class="pagination justify-content-center mt-2">
+        {% if p.hasPreviousPage %}
+            <li class="page-item">
+                <a class="page-link" href="{{ currentPath }}?page={{ p.previousPage }}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="{{ currentPath }}?page={{ p.previousPage }}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+
+
+    {% set limit = 5 %}
+    {% set fromPage = p.currentPage > limit ? p.currentPage - limit : 1 %}
+    {% set toPage = p.lastPage - p.currentPage >= limit ? p.currentPage + limit : p.lastPage%}
+
+    {% for i in fromPage..toPage %}
+        {% if i == p.currentPage %}
+            <li class="page-item active">
+                <a class="page-link" href="#">
+                    {{ i }}
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item active">
+                <a class="page-link" href="{{ currentPath }}?page={{ i }}">
+                    {{ i }}
+                </a>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+    {% if p.hasNextPage %}
+        <li class="page-item">
+            <a class="page-link" href="{{ currentPath }}?page={{ p.nextPage }}">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="page-item disable">
+            <a class="page-link" href="#">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    {% endif %}
+    </ul>
+{% endif %}

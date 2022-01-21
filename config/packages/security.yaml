@@ -29,6 +29,12 @@ security:
 
             logout:
                 path: app_logout
+                target: post_index        #todo redirect after logout
+
+            remember_me:                            # todo created remember me session
+                secret: '%kernel.secret%'
+                lifetime: 604000
+                path: /
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
