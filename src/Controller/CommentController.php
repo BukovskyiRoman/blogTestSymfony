@@ -8,35 +8,32 @@ use App\Form\CommentType;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class CommentController extends AbstractController
 {
-    #[Route('/comment', name: 'comment')]
-    public function index(): Response
-    {
-        return $this->render('comment/index.html.twig', [
-            'controller_name' => 'CommentController',
-        ]);
-    }
-
     #[Route('/comment/new', name: 'comment_new')]
     public function new(Request $request, EntityManagerInterface $entityManager, PostRepository $postRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getUser();
+        $post = $postRepository->find($request->get('post_id'));
+
 
         $comment = new Comment();
-        $form = $this->createForm(CommentType::class, $comment);
+
+        $form = $this->createFormBuilder($comment)
+        ->add('body', TextType::class)
+        ->getForm();
         $form->handleRequest($request);
 
-        $post =$postRepository->find($request->get('post_id'));
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if (true) {
             $comment->setUser($user);
             $comment->setPost($post);
+            $comment->setBody($request->get('body'));
             $entityManager->persist($comment);
             $entityManager->flush();
 

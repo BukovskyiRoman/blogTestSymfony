@@ -12,6 +12,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -29,11 +30,17 @@ class PostController extends AbstractController
         $form = $this->createForm(PostType::class);
         $formComment = $this->createForm(CommentType::class);
 
-        return $this->renderForm('post/index.html.twig', [
+        $comment = new Comment();
+        $formC = $this->createFormBuilder($comment)
+            ->add('body', TextType::class)
+            ->getForm();
+
+        return $this->render('post/index.html.twig', [
             //'cards' => $posts,
             'pagination' => $postRepository->getList($page),
-            'form' => $form,
-            'formComment' => $formComment,
+            'form' => $form->createView(),
+            'formComment' => $formComment->createView(),
+            'formC' => $formC->createView(),
         ]);
     }
 
