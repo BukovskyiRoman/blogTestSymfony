@@ -50,18 +50,17 @@ class CommentController extends AbstractController
     #[Route('comment/{id}/edit', name: 'comment_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(PostType::class, $comment);
+        $form = $this->createForm(CommentType::class, $comment);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
             return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->renderForm('post/edit.html.twig', [
-            'post' => $comment,
-            'form' => $form,
+        return $this->renderForm('comment/edit_comment.html.twig', [
+            'comment' => $comment,
+            'formComment' => $form,
         ]);
     }
 
@@ -75,4 +74,5 @@ class CommentController extends AbstractController
 
         return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }
+
 }

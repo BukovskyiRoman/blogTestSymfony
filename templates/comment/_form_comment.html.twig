@@ -1,0 +1,4 @@
+{{ form_start(formComment) }}
+    {{ form_widget(formComment) }}
+    <button class="btn-info" formaction="{{ path('comment_new') }}">{{ button_label|default('Save') }}</button>
+{{ form_end(formComment) }}
