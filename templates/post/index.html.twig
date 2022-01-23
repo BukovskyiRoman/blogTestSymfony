@@ -26,12 +26,12 @@
     {% for post in pagination.posts %}
         <div class="card mb-2" style="width: 100%;">
             <div class="card-body m-3">
-                <h5 class="card-title">Title: {{ post.title }}</h5>
+                <a href="{{ path('post_show', {'id': post.id}) }}" class="card-link"><h5 class="card-title">Title: {{ post.title }}</h5></a>
                 <h6 class="card-subtitle mb-2 text-muted">Author: {{ post.userId.name }}</h6>
                 <h6 class="card-subtitle mb-2 text-muted">Date: {{ post.createdAt|date("H:i  j F") }}</h6>
                 <p class="card-text">{{ post.body }}</p>
-                <a href="{{ path('post_show', {'id': post.id}) }}" class="card-link">Show</a>
                 <a href="{{ path('post_edit', {'id': post.id}) }}" class="card-link">Edit</a>
+                {{ include('post/_delete_form.html.twig') }}
             </div>
 
             <div class="card-body" style="border: 1px solid grey">
@@ -50,10 +50,12 @@
                                  data-bs-parent="#accordionFlushExample">
                                 <div class="accordion-body">
                                     <p>{{ comment.body }}</p>
+                                    {% include'comment/_delete_comment_form.html.twig' %}
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 {% endfor %}
                 <div class="card-body" style="border: 1px solid grey; padding: 30px; margin-bottom: 2%">
                     <h5>Write comment:</h5>
@@ -62,7 +64,7 @@
                       <input type="text" class="form-control" id="floatingInputValue" name="body" placeholder="Add comment">
                      <button class="btn btn-info mt-2" type="submit">Add comment</button>
                       </form>
-{#                    {% include'comment/_form_comment.html.twig' %}#}
+
                 </div>
             </div>
         </div>
