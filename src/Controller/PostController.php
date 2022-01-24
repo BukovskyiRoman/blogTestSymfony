@@ -28,38 +28,28 @@ class PostController extends AbstractController
     #[Route('/', name: 'post_index', methods: ['GET'])]
     public function index(PostRepository $postRepository, Request $request, PaginatorInterface $paginator, EntityManagerInterface $em): Response
     {
-        $sort = 'DESC';
-        if ($id = $request->get('author')) {
-
-            $queryBuilder = $postRepository->findByExampleField($id, $sort);
-
-            $pagination = $paginator->paginate(
-                $queryBuilder, /* query NOT result */
-                $request->query->getInt('page', 1)/*page number*/,
-                5/*limit per page*/
-            );
-
-            return $this->render('post/index2.html.twig', [
-                'pagination' => $pagination,
-            ]);
+        if ($sort = $request->get('sort')) {
+            $queryBuilder = $postRepository->sortByTime($sort);
+        } elseif ($id = $request->get('author')) {
+            $queryBuilder = $postRepository->findByAuthorId($id);
         } else {
             $queryBuilder = $postRepository->findAll();
-
-            $pagination = $paginator->paginate(
-                $queryBuilder, /* query NOT result */
-                $request->query->getInt('page', 1)/*page number*/,
-                5/*limit per page*/
-            );
-
-            return $this->render('post/index2.html.twig', [
-                'pagination' => $pagination,
-            ]);
         }
 
-        $page = $request->get('page', 1);
-        return $this->render('post/index.html.twig', [
-            'pagination' => $postRepository->getList($page),
+        $pagination = $paginator->paginate(
+            $queryBuilder, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            5/*limit per page*/
+        );
+
+        return $this->render('post/index2.html.twig', [
+            'pagination' => $pagination,
         ]);
+
+//        $page = $request->get('page', 1);
+//        return $this->render('post/index.html.twig', [
+//            'pagination' => $postRepository->getList($page),
+//        ]);
     }
 
     #[Route('/new', name: 'post_new', methods: ['GET', 'POST'])]

@@ -29,7 +29,7 @@
     <h1>Post index</h1>
     <form action="{{ path('post_index') }}" method="GET">
         <select name="sort">
-            <option value="desc">newest</option>
+            <option value="desc" selected>newest</option>
             <option value="asc" >oldest</option>
 {#            <option value="max" @if ($options['sort'] === 'max') selected @endif>like(max)</option>#}
 {#            <option value="min" @if ($options['sort'] === 'min') selected @endif>like(min)</option>#}

@@ -35,11 +35,19 @@ class PostRepository extends ServiceEntityRepository
      * @return Post[] Returns an array of Post objects
      */
 
-    public function findByExampleField($value, $sort)
+    public function findByAuthorId($value)
     {
         return $this->createQueryBuilder('p')
             ->andWhere('p.user = :val')
             ->setParameter('val', $value)
+            ->orderBy('p.id', 'DESC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function sortByTime($sort) {
+        return $this->createQueryBuilder('p')
             ->orderBy('p.id', $sort)
             ->setMaxResults(10)
             ->getQuery()
