@@ -5,7 +5,10 @@
 {% block body %}
     <h1>Edit Comment</h1>
 
-    {{ include('comment/_form_comment.html.twig', {'button_label': 'Update'}) }}
+    <form class="form-floating mb-2" action="{{ path('comment_update', {'id': comment.id}) }}" method="post">
+        <input type="text" class="form-control" id="floatingInputValue" name="body" value="{{ comment.body }}">
+        <button class="btn btn-info mt-2" type="submit">Edit comment</button>
+    </form>
 
     <a href="{{ path('post_index') }}">back to list</a>
 

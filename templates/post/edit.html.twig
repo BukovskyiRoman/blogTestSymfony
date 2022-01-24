@@ -5,7 +5,13 @@
 {% block body %}
     <h1>Edit Post</h1>
 
-    {{ include('post/_form.html.twig', {'button_label': 'Update'}) }}
+    <form action="{{ path('post_update', {'id': post.id}) }}" method="post">
+        <input class="form-control mb-2" type="text" value="{{ post.title }}" name="title">
+        <input class="form-control mb-2" type="text" value="{{ post.body }}" name="body">
+        <button type="submit" class="btn btn-info mb-2">Save</button>
+    </form>
+
+{#    {{ include('post/_form.html.twig', {'button_label': 'Update'}) }}#}
 
     <a href="{{ path('post_index') }}">back to list</a>
 

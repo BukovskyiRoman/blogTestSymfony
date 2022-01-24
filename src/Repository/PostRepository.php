@@ -31,22 +31,20 @@ class PostRepository extends ServiceEntityRepository
     }
 
 
-    // /**
-    //  * @return Post[] Returns an array of Post objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return Post[] Returns an array of Post objects
+     */
+
+    public function findByExampleField($value, $sort)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
+            ->andWhere('p.user = :val')
             ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
+            ->orderBy('p.id', $sort)
             ->setMaxResults(10)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 
     /*
     public function findOneBySomeField($value): ?Post

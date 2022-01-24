@@ -11,53 +11,85 @@ use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/post')]
 class PostController extends AbstractController
 {
     #[Route('/', name: 'post_index', methods: ['GET'])]
-    public function index(PostRepository $postRepository, Request $request, ManagerRegistry $doctrine): Response
+    public function index(PostRepository $postRepository, Request $request, PaginatorInterface $paginator, EntityManagerInterface $em): Response
     {
+        $sort = 'DESC';
+        if ($id = $request->get('author')) {
+
+            $queryBuilder = $postRepository->findByExampleField($id, $sort);
+
+            $pagination = $paginator->paginate(
+                $queryBuilder, /* query NOT result */
+                $request->query->getInt('page', 1)/*page number*/,
+                5/*limit per page*/
+            );
+
+            return $this->render('post/index2.html.twig', [
+                'pagination' => $pagination,
+            ]);
+        } else {
+            $queryBuilder = $postRepository->findAll();
+
+            $pagination = $paginator->paginate(
+                $queryBuilder, /* query NOT result */
+                $request->query->getInt('page', 1)/*page number*/,
+                5/*limit per page*/
+            );
+
+            return $this->render('post/index2.html.twig', [
+                'pagination' => $pagination,
+            ]);
+        }
+
         $page = $request->get('page', 1);
-        //$posts = $doctrine->getRepository(Post::class)->find(1);
-
-        $form = $this->createForm(PostType::class);
-
         return $this->render('post/index.html.twig', [
-            //'cards' => $posts,
             'pagination' => $postRepository->getList($page),
-            'form' => $form->createView(),
         ]);
     }
 
     #[Route('/new', name: 'post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getUser();
 
         $post = new Post();
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $post->user = $user;
-            $entityManager->persist($post);
-            $entityManager->flush();
+        $post->setUserId($user);
+        $post->setTitle($request->get('title'));
+        $post->setBody($request->get('body'));
 
-            $this->addFlash(
-                'post_add_notice',
-                'Flash massage: Post added!'
-            );
+        $errors = $validator->validate($post);
+
+        if (count($errors) > 0) {
+            $errorsString = $errors;
+            return new Response($errorsString);
         }
 
-        return $this->redirectToRoute('post_index', [],Response::HTTP_SEE_OTHER);
+        $entityManager->persist($post);
+        $entityManager->flush();
+
+        $this->addFlash(
+            'post_add_notice',
+            'Flash massage: Post added!'
+        );
+
+        return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}', name: 'post_show', methods: ['GET'])]
@@ -69,21 +101,61 @@ class PostController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'post_edit', methods: ['GET', 'POST'])]
+    //   #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
+        $this->denyAccessUnlessGranted('ROLE_USER');            //todo
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+        if ($post->getUserId() === $this->getUser()) {
+            $form = $this->createForm(PostType::class, $post);
+            $form->handleRequest($request);
 
-            return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $entityManager->flush();
+                return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
+            }
+
+            return $this->renderForm('post/edit.html.twig', [
+                'post' => $post,
+                'form' => $form,
+            ]);
+        } else {
+            throw new AccessDeniedException('Access denied!');
+        }
+    }
+
+    #[Route('/{id}/update', name: 'post_update')]
+    public function update(ManagerRegistry $doctrine, Request $request, ValidatorInterface $validator): Response
+    {
+        $id = $request->get('id');
+        $entityManager = $doctrine->getManager();
+        $post = $entityManager->getRepository(Post::class)->find($id);
+
+
+        if (!$post) {
+            throw $this->createNotFoundException(
+                'No post found for id ' . $id
+            );
         }
 
-        return $this->renderForm('post/edit.html.twig', [
-            'post' => $post,
-            'form' => $form,
-        ]);
+        $post->setTitle($request->get('title'));
+        $post->setBody($request->get('body'));
+
+        $errors = $validator->validate($post);
+
+        if (count($errors) > 0) {
+            $errorsString = (string)$errors;
+            return new Response($errorsString);
+        }
+
+        $entityManager->flush();
+
+        $this->addFlash(
+            'post_edit_notice',
+            'Flash massage: Post edited!'
+        );
+
+        return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}', name: 'post_delete', methods: ['POST'])]

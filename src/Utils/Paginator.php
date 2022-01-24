@@ -34,7 +34,8 @@ class Paginator
         return $this->numResult;
     }
 
-    final public function getLastPage() {
+    final public function getLastPage(): int
+    {
         return (int) ceil($this->numResult / $this->perPage);
     }
 
@@ -61,6 +62,7 @@ class Paginator
             ->setMaxResults($this->perPage);
 
         $query = $qb->getQuery();
+
         $paginator = new \Doctrine\ORM\Tools\Pagination\Paginator($query, true);
 
        // dd($paginator);

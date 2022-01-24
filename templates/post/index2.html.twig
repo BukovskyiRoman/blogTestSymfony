@@ -27,8 +27,16 @@
     </div>
 
     <h1>Post index</h1>
-
-    {% for post in pagination.posts %}
+    <form action="{{ path('post_index') }}" method="GET">
+        <select name="sort">
+            <option value="desc">newest</option>
+            <option value="asc" >oldest</option>
+{#            <option value="max" @if ($options['sort'] === 'max') selected @endif>like(max)</option>#}
+{#            <option value="min" @if ($options['sort'] === 'min') selected @endif>like(min)</option>#}
+        </select>
+        <p><input type="submit" value="Sort"></p>
+    </form>
+    {% for post in pagination.items %}
         <div class="card mb-2" style="width: 100%;">
             <div class="card-body m-3">
                 <a href="{{ path('post_show', {'id': post.id}) }}" class="card-link"><h5 class="card-title">Title: {{ post.title }}</h5></a>
@@ -79,9 +87,5 @@
             <h1>No records</h1>
         </div>
     {% endfor %}
-
-    {#    <a class="btn btn-primary m-3" href="{{ path('post_new') }}">Create new</a> #}
-
-    {% include 'utils/paginator.html.twig' with {'p': pagination} %}
-
+    {{ knp_pagination_render(pagination) }}
 {% endblock %}
