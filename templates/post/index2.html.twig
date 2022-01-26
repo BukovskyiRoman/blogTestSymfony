@@ -2,6 +2,7 @@
 
 {% block title %}Post index{% endblock %}
 
+
 {% block body %}
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
         <p>Email: {{ app.user.email }}</p>
@@ -27,6 +28,7 @@
     </div>
 
     <h1>Post index</h1>
+    <a href="{{ path('connect_google_start') }}">Google auth</a>
     <form action="{{ path('post_index') }}" method="GET">
         <select name="sort">
             <option value="desc" selected>newest</option>

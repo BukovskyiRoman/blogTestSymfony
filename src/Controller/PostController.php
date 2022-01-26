@@ -5,22 +5,28 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Entity\Post;
 use App\Entity\User;
+use App\Event\AddPostEvent;
 use App\Form\CommentType;
 use App\Form\PostType;
+use App\Message\SmsNotification;
 use App\Repository\PostRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[Route('/post')]
 class PostController extends AbstractController
@@ -53,7 +59,8 @@ class PostController extends AbstractController
     }
 
     #[Route('/new', name: 'post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function new(Request $request, EntityManagerInterface $entityManager,
+                        ValidatorInterface $validator, MessageBusInterface $bus, EventDispatcherInterface $eventDispatcher): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getUser();
@@ -74,12 +81,26 @@ class PostController extends AbstractController
         $entityManager->persist($post);
         $entityManager->flush();
 
+        $this->sendNotificationAboutNewPost($eventDispatcher, $post);
+
+//        $bus->dispatch(new SmsNotification('Look! I created a message!'));
+
         $this->addFlash(
             'post_add_notice',
             'Flash massage: Post added!'
         );
 
         return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param Post $post
+     * @return void
+     */
+    public function sendNotificationAboutNewPost(EventDispatcherInterface $eventDispatcher, Post $post)
+    {
+        $eventDispatcher->dispatch(new AddPostEvent($post));
     }
 
     #[Route('/{id}', name: 'post_show', methods: ['GET'])]
