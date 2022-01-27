@@ -53,7 +53,7 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $event = new UserRegisteredEvent($user->getId());
+            $event = new UserRegisteredEvent($user->getId());               //todo event
             $messageBus->dispatch($event);
 
             // generate a signed url and email it to the user

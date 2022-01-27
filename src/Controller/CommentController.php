@@ -11,16 +11,21 @@ use Doctrine\ORM\EntityManagerInterface;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ *
+ */
 class CommentController extends AbstractController
 {
     #[Route('/comment/new', name: 'comment_new')]
-    public function new(Request $request, EntityManagerInterface $entityManager, PostRepository $postRepository, ValidatorInterface $validator): Response
+    public function new(Request $request,
+                        EntityManagerInterface $entityManager,
+                        PostRepository $postRepository,
+                        ValidatorInterface $validator): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getUser();
@@ -51,6 +56,12 @@ class CommentController extends AbstractController
         return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    /**
+     * @param Request $request
+     * @param Comment $comment
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('comment/{id}/edit', name: 'comment_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
     {
@@ -68,6 +79,12 @@ class CommentController extends AbstractController
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param Comment $comment
+     * @param EntityManagerInterface $entityManager
+     * @return Response
+     */
     #[Route('/comment/{id}/delete', name: 'comment_delete', methods: ['POST'])]
     public function delete(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
     {
@@ -79,15 +96,18 @@ class CommentController extends AbstractController
         return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    /**
+     * @param ManagerRegistry $doctrine
+     * @param Request $request
+     * @param ValidatorInterface $validator
+     * @return Response
+     */
     #[Route('comment/{id}/update', name: 'comment_update')]
-    public function update(ManagerRegistry    $doctrine, Request $request, EntityManagerInterface $entityManager,
-                           ValidatorInterface $validator): Response
+    public function update(ManagerRegistry $doctrine, Request $request, ValidatorInterface $validator): Response
     {
-
         $id = $request->get('id');
         $entityManager = $doctrine->getManager();
         $comment = $entityManager->getRepository(Comment::class)->find($id);
-
 
         if (!$comment) {
             throw $this->createNotFoundException(

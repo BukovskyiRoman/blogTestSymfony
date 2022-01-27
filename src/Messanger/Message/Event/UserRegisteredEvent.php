@@ -6,18 +6,18 @@ use App\Entity\User;
 
 class UserRegisteredEvent
 {
-    private $user;
+    private $userId;
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getUser()
+    public function getUserId()
     {
-        return $this->user;
+        return $this->userId;
     }
 
-    public function __construct(string $user)
+    public function __construct(string $userId)
     {
-        $this->user = $user;
+        $this->userId = $userId;
     }
 }
