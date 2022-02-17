@@ -17,6 +17,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+
     /**
      *
      */
@@ -26,10 +27,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->comment = new ArrayCollection();
     }
 
-    /**
-     * @ORM\Column(name="googleAuthenticatorSecret", type="string", nullable=true)
-     */
-    private $googleAuthenticatorSecret;
+
+    #[ORM\Column(type: 'string', length: 25, nullable: true)]
+    private $googleId;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -42,7 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private $roles = [];
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: true)]
     private $password;
 
     /**
@@ -58,6 +58,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class, orphanRemoval: true)]
     private $comment;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $avatar;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private $description;
 
     public function getId(): ?int
     {
@@ -140,13 +146,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection|Post[]
+     * @return Collection
      */
     public function getPosts(): Collection
     {
         return $this->posts;
     }
 
+    /**
+     * @param Post $post
+     * @return $this
+     */
     public function addPost(Post $post): self
     {
         if (!$this->posts->contains($post)) {
@@ -174,6 +184,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -213,7 +227,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isGoogleAuthenticatorEnabled(): bool
     {
-        return null !== $this->googleAuthenticatorSecret;
+        return null !== $this->googleId;
     }
 
     public function getGoogleAuthenticatorUsername(): string
@@ -221,13 +235,44 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->name;
     }
 
-    public function getGoogleAuthenticatorSecret(): ?string
+    /**
+     * @return string|null
+     */
+    public function getGoogleId(): ?string
     {
-        return $this->googleAuthenticatorSecret;
+        return $this->googleId;
     }
 
-    public function setGoogleAuthenticatorSecret(?string $googleAuthenticatorSecret): void
+    /**
+     * @param string|null $googleId
+     * @return void
+     */
+    public function setGoogleId(?string $googleId): void
     {
-        $this->googleAuthenticatorSecret = $googleAuthenticatorSecret;
+        $this->googleId = $googleId;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): self
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
     }
 }

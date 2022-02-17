@@ -28,11 +28,26 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
+/**
+ *
+ */
 #[Route('/post')]
 class PostController extends AbstractController
 {
+    /**
+     * @param PostRepository $postRepository
+     * @param Request $request
+     * @param PaginatorInterface $paginator
+     * @param EntityManagerInterface $em
+     * @return Response
+     */
     #[Route('/', name: 'post_index', methods: ['GET'])]
-    public function index(PostRepository $postRepository, Request $request, PaginatorInterface $paginator, EntityManagerInterface $em): Response
+    public function index(
+        PostRepository         $postRepository,
+        Request                $request,
+        PaginatorInterface     $paginator,
+        EntityManagerInterface $em
+    ): Response
     {
         if ($sort = $request->get('sort')) {
             $queryBuilder = $postRepository->sortByTime($sort);
@@ -59,8 +74,12 @@ class PostController extends AbstractController
     }
 
     #[Route('/new', name: 'post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager,
-                        ValidatorInterface $validator, MessageBusInterface $bus, EventDispatcherInterface $eventDispatcher): Response
+    public function new(
+        Request                  $request,
+        EntityManagerInterface   $entityManager,
+        ValidatorInterface       $validator,
+        MessageBusInterface      $bus,
+        EventDispatcherInterface $eventDispatcher): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $user = $this->getUser();
@@ -169,13 +188,32 @@ class PostController extends AbstractController
         return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}', name: 'post_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'post_delete')]
     public function delete(Request $request, Post $post, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $post->getId(), $request->request->get('_token'))) {
+        $user = $this->getUser();
+
+
+        if ((strcmp($user->getUserIdentifier(), $post->getUserId()->getUserIdentifier())) == 0 ||
+        in_array('ADMIN',$user->getRoles(), true)) {
             $entityManager->remove($post);
             $entityManager->flush();
+
+            $this->addFlash(
+                'post_delete_notice',
+                'Flash massage: Post deleted!'
+            );
+        } else {
+            $this->addFlash(
+                'post_delete_notice',
+                'Flash massage: This is not yours post!'
+            );
         }
+
+//        if ($this->isCsrfTokenValid('delete' . $post->getId(), $request->request->get('_token'))) {
+//            $entityManager->remove($post);
+//            $entityManager->flush();
+//        }
 
         return $this->redirectToRoute('post_index', [], Response::HTTP_SEE_OTHER);
     }

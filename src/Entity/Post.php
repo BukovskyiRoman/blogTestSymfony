@@ -26,7 +26,7 @@ class Post
 
     #[ORM\Column(type: 'text')]
     #[Assert\NotBlank]
-    #[Assert\Length(min: 10, max: 1000, minMessage: 'To shot post body', maxMessage: 'To long post body')]
+    #[Assert\Length(min: 1, max: 1000, minMessage: 'To shot post body', maxMessage: 'To long post body')]
     private $body;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'posts')]

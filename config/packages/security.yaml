@@ -9,8 +9,6 @@ security:
   # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
   providers:
     # used to reload user from session & other features (e.g. switch_user)
-    oauth:
-      id: knpu.oauth2.user_provider
     app_user_provider:
       entity:
         class: App\Entity\User
@@ -22,9 +20,8 @@ security:
     main:
       lazy: true
       provider: app_user_provider
-
-
-
+      custom_authenticators:        #todo authenticate with google
+          - App\Security\GoogleAuthenticator
       form_login:
         # "login" is the name of the route created previously
         login_path: login
@@ -40,9 +37,6 @@ security:
         lifetime: 604000
         path: /
 
-#      guard:
-#          authenticators:
-#            - App\Security\GoogleAuthenticator
 
       # activate different ways to authenticate
       # https://symfony.com/doc/current/security.html#the-firewall

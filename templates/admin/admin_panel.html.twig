@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Admin panel</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Role</th>
+            <th scope="col">Comments</th>
+            <th scope="col">Posts</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <th scope="row">1</th>
+                <td>{{ user.id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{% for role in user.getRoles() %} {{ role }} </br> {% endfor %}</td>
+                <td>
+                    <button type="button" class="btn btn-secondary">
+                        Comments <span class="badge bg-success">{{ user.getComment()|length }}</span>
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-secondary">
+                        Posts <span class="badge bg-success">{{ user.getPosts()|length }}</span>
+                    </button>
+                </td>
+                <td>
+                    <form method="post" action="{{ path('user_delete', {'id': user.id}) }}"
+                          onsubmit="return confirm('Are you sure you want to delete user {{ user.name }}?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                        <button class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

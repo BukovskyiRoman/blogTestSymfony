@@ -2,12 +2,17 @@
 
 {% block title %}Post index{% endblock %}
 
-
 {% block body %}
     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-        <p>Email: {{ app.user.email }}</p>
+        <div class="card-body" style="border: 1px solid grey; padding: 30px; margin-bottom: 2%">
+            <h1>Create post form:</h1>
+            <form action="{{ path('post_new') }}" method="post">
+                <input class="form-control mb-2" type="text" placeholder="title" name="title">
+                <input class="form-control mb-2" type="text" placeholder="body" name="body">
+                <button type="submit" class="btn btn-info mb-2">Save</button>
+            </form>
+        </div>
     {% endif %}
-
 
     {% for label, messages in app.flashes %}
         {% for message in messages %}
@@ -17,32 +22,33 @@
         {% endfor %}
     {% endfor %}
 
-    <div class="card-body" style="border: 1px solid grey; padding: 30px; margin-bottom: 2%">
-        <h1>Create post form:</h1>
-{#        {{ include('post/_form.html.twig') }}#}
-        <form action="{{ path('post_new') }}" method="post">
-            <input class="form-control mb-2" type="text" placeholder="title" name="title">
-            <input class="form-control mb-2" type="text" placeholder="body" name="body">
-            <button type="submit" class="btn btn-info mb-2">Save</button>
-        </form>
-    </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
 
-    <h1>Post index</h1>
-    <a href="{{ path('connect_google_start') }}">Google auth</a>
-    <form action="{{ path('post_index') }}" method="GET">
-        <select name="sort">
-            <option value="desc" selected>newest</option>
-            <option value="asc" >oldest</option>
-{#            <option value="max" @if ($options['sort'] === 'max') selected @endif>like(max)</option>#}
-{#            <option value="min" @if ($options['sort'] === 'min') selected @endif>like(min)</option>#}
-        </select>
-        <p><input type="submit" value="Sort"></p>
-    </form>
+            <form class="row g-3" action="{{ path('post_index') }}" method="GET">
+                <div class="col-auto">
+                    <select class="form-control-plaintext" aria-label="Default select example" name="sort">
+                        <option value="desc" selected>newest</option>
+                        <option value="asc">oldest</option>
+                        {#            <option value="max" @if ($options['sort'] === 'max') selected @endif>like(max)</option> #}
+                        {#            <option value="min" @if ($options['sort'] === 'min') selected @endif>like(min)</option> #}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary mb-3" value="Sort">Sort</button>
+                </div>
+            </form>
+        </div>
+    </nav>
+
+
     {% for post in pagination.items %}
         <div class="card mb-2" style="width: 100%;">
             <div class="card-body m-3">
-                <a href="{{ path('post_show', {'id': post.id}) }}" class="card-link"><h5 class="card-title">Title: {{ post.title }}</h5></a>
-                <h6 class="card-subtitle mb-2 text-muted">Author: <a href="{{ path('post_index')}}?author={{ post.userId.id }}"> {{ post.userId.name }}</h6></a>
+                <a href="{{ path('post_show', {'id': post.id}) }}" class="card-link"><h5 class="card-title">
+                        Title: {{ post.title }}</h5></a>
+                <h6 class="card-subtitle mb-2 text-muted">Author: <a
+                        href="{{ path('post_index') }}?author={{ post.userId.id }}"> {{ post.userId.name }}</h6></a>
                 <h6 class="card-subtitle mb-2 text-muted">Date: {{ post.createdAt|date("H:i  j F") }}</h6>
                 <p class="card-text">{{ post.body }}</p>
                 <a href="{{ path('post_edit', {'id': post.id}) }}" class="card-link">Edit</a>
@@ -75,11 +81,12 @@
                 {% endfor %}
                 <div class="card-body" style="border: 1px solid grey; padding: 30px; margin-bottom: 2%">
                     <h5>Write comment:</h5>
-                     <form class="form-floating mb-2" action="{{ path('comment_new') }}" method="post">
-                     <input type="hidden" value="{{ post.id }}" name="post_id">
-                      <input type="text" class="form-control" id="floatingInputValue" name="body" placeholder="Add comment">
-                     <button class="btn btn-info mt-2" type="submit">Add comment</button>
-                      </form>
+                    <form class="form-floating mb-2" action="{{ path('comment_new') }}" method="post">
+                        <input type="hidden" value="{{ post.id }}" name="post_id">
+                        <input type="text" class="form-control" id="floatingInputValue" name="body"
+                               placeholder="Add comment">
+                        <button class="btn btn-info mt-2" type="submit">Add comment</button>
+                    </form>
 
                 </div>
             </div>
