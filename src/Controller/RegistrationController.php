@@ -34,9 +34,20 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app_register')]
-    public function register(Request                $request, UserPasswordHasherInterface $userPasswordHasher,
-                             EntityManagerInterface $entityManager, MessageBusInterface $messageBus): Response
+    public function register(
+        Request                     $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface      $entityManager,
+        MessageBusInterface         $messageBus
+    ): Response
     {
+        if ($this->getUser()) {
+            $this->addFlash(
+                'user_registered_notice',
+                'Flash massage: You are login!'
+            );
+            return $this->redirectToRoute('user_profile');
+        }
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -57,14 +68,16 @@ class RegistrationController extends AbstractController
             $messageBus->dispatch($event);
 
             // generate a signed url and email it to the user
-            $this->emailVerifier->sendEmailConfirmation('app_verify_email',
-                $user,
-                (new TemplatedEmail())
-                    ->from(new Address('mailer@your-domain.com', 'mail bot'))
-                    ->to($user->getEmail())
-                    ->subject('Please Confirm your Email')
-                    ->htmlTemplate('registration/confirmation_email.html.twig')
-            );
+            $this->emailVerifier
+                ->sendEmailConfirmation(
+                    'app_verify_email',
+                    $user,
+                    (new TemplatedEmail())
+                        ->from(new Address('mailer@your-domain.com', 'mail bot'))
+                        ->to($user->getEmail())
+                        ->subject('Please Confirm your Email')
+                        ->htmlTemplate('registration/confirmation_email.html.twig')
+                );
             // do anything else you need here, like send an email
 
             return $this->redirectToRoute('_profiler_home');

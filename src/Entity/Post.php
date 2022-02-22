@@ -39,10 +39,14 @@ class Post
     #[ORM\OneToMany(mappedBy: 'post', targetEntity: Comment::class, orphanRemoval: true)]
     private $comments;
 
+    #[ORM\OneToMany(mappedBy: 'post', targetEntity: Like::class)]
+    private $likes;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->comments = new ArrayCollection();
+        $this->likes = new ArrayCollection();
     }
 
 
@@ -122,6 +126,36 @@ class Post
             // set the owning side to null (unless already changed)
             if ($comment->getPost() === $this) {
                 $comment->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Like[]
+     */
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addCommentId(Like $commentId): self
+    {
+        if (!$this->likes->contains($commentId)) {
+            $this->likes[] = $commentId;
+            $commentId->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommentId(Like $commentId): self
+    {
+        if ($this->likes->removeElement($commentId)) {
+            // set the owning side to null (unless already changed)
+            if ($commentId->getPost() === $this) {
+                $commentId->setPost(null);
             }
         }
 

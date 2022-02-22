@@ -12,9 +12,20 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 class LoginController extends AbstractController
 {
+    /**
+     * @param AuthenticationUtils $authenticationUtils
+     * @return Response
+     */
     #[Route('/login', name: 'login')]
     public function index(AuthenticationUtils $authenticationUtils): Response
     {
+        if ($this->getUser()) {
+            $this->addFlash(
+                'user_registered_notice',
+                'Flash massage: You are login!'
+            );
+            return $this->redirectToRoute('user_profile');
+        }
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
 
